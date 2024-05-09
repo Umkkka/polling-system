@@ -8,6 +8,7 @@ import (
 
 type PollService interface {
 	Create(ctx context.Context, info *service.PollInfo) (string, error)
+	Get(ctx context.Context, uuid string) (*service.PollInfo, error)
 }
 
 func New(us PollService) *Handler {

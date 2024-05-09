@@ -9,6 +9,7 @@ import (
 
 type Repository interface {
 	Create(ctx context.Context, info *service.PollInfo) (uuid string, err error)
+	Get(ctx context.Context, uuid string) (*service.PollInfo, error)
 }
 
 func New(repo Repository) *Poll {
@@ -28,4 +29,13 @@ func (p *Poll) Create(ctx context.Context, info *service.PollInfo) (string, erro
 	}
 
 	return uuid, nil
+}
+
+func (p *Poll) Get(ctx context.Context, uuid string) (*service.PollInfo, error) {
+	pollInfo, err := p.repo.Get(ctx, uuid)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get poll: %w", err)
+	}
+
+	return pollInfo, nil
 }

@@ -1,5 +1,6 @@
 package service
 
 type PollInfo struct {
-	Name string
+	Title   string   `json:"title"`
+	Options []string `json:"options"`
 }

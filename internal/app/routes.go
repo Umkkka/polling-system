@@ -74,6 +74,8 @@ func setupApiRoutes(engine *gin.Engine, pollHandler *handler.Handler) {
 		v1 := api.Group("/v1")
 		{
 			v1.POST("/poll", pollHandler.CreatePoll)
+
+			v1.GET("/poll", pollHandler.GetPoll)
 		}
 	}
 }
