@@ -76,6 +76,8 @@ func setupApiRoutes(engine *gin.Engine, pollHandler *handler.Handler) {
 			v1.POST("/poll", pollHandler.CreatePoll)
 
 			v1.GET("/poll", pollHandler.GetPoll)
+
+			v1.POST("/vote", pollHandler.SaveVote)
 		}
 	}
 }

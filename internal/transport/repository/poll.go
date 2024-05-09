@@ -1,12 +1,11 @@
 package repository
 
 import (
-	"context"
 	"errors"
 
-	"polling-system/internal/service"
-
 	"github.com/google/uuid"
+
+	"polling-system/internal/service"
 )
 
 type PollDTO struct {
@@ -14,21 +13,26 @@ type PollDTO struct {
 	Options []string
 }
 
-func (r *Repo) Create(ctx context.Context, p *service.PollInfo) (string, error) {
+func (r *Repo) Create(poll *service.PollInfo) (string, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	uuid := uuid.NewString()
 
 	r.data[uuid] = PollDTO{
-		Title:   p.Title,
-		Options: p.Options,
+		Title:   poll.Title,
+		Options: poll.Options,
+	}
+	r.results[uuid] = make(map[string]int)
+
+	for _, option := range poll.Options {
+		r.results[uuid][option] = 0
 	}
 
 	return uuid, nil
 }
 
-func (r *Repo) Get(ctx context.Context, uuid string) (*service.PollInfo, error) {
+func (r *Repo) Get(uuid string) (*service.PollInfo, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -43,4 +47,31 @@ func (r *Repo) Get(ctx context.Context, uuid string) (*service.PollInfo, error) 
 	}
 
 	return pollInfo, nil
+}
+
+func (r *Repo) SaveVote(uuid, answer string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	poll, ok := r.data[uuid]
+	if !ok {
+		return errors.New("poll not found")
+	}
+
+	if !isExist(poll.Options, answer) {
+		return errors.New("answer does not exist in poll")
+	}
+
+	r.results[uuid][answer]++
+	return nil
+}
+
+func isExist(arr []string, target string) bool {
+	for _, s := range arr {
+		if s == target {
+			return true
+		}
+	}
+
+	return false
 }

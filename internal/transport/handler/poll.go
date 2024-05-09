@@ -1,21 +1,12 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"polling-system/internal/service"
 )
-
-type CreatePollRequest struct {
-	Name string `json:"name"`
-}
-
-type CreatePollResponse struct {
-	UUID string `json:"uuid"`
-}
 
 func (h *Handler) CreatePoll(ctx *gin.Context) {
 	var newPoll service.PollInfo
@@ -34,9 +25,9 @@ func (h *Handler) CreatePoll(ctx *gin.Context) {
 		return
 	}
 
-	uuid, err := h.poll.Create(ctx.Request.Context(), &newPoll)
+	uuid, err := h.poll.Create(&newPoll)
 	if err != nil {
-		ctx.Error(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -46,15 +37,37 @@ func (h *Handler) CreatePoll(ctx *gin.Context) {
 func (h *Handler) GetPoll(ctx *gin.Context) {
 	uuid := ctx.Query("uuid")
 	if uuid == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "UUID parameter is required"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "uuid parameter is required"})
 		return
 	}
 
-	pollInfo, err := h.poll.Get(ctx.Request.Context(), uuid)
+	pollInfo, err := h.poll.Get(uuid)
 	if err != nil {
-		ctx.Error(fmt.Errorf("failed to get poll: %w", err))
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, map[string]interface{}{"data": pollInfo})
+}
+
+func (h *Handler) SaveVote(ctx *gin.Context) {
+	uuid := ctx.Query("uuid")
+	if uuid == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Uuid parameter is required"})
+		return
+	}
+
+	answer := ctx.Query("answer")
+	if answer == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Answer parameter is required"})
+		return
+	}
+
+	err := h.poll.SaveVote(uuid, answer)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, nil)
 }

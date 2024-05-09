@@ -1,14 +1,13 @@
 package handler
 
 import (
-	"context"
-
 	"polling-system/internal/service"
 )
 
 type PollService interface {
-	Create(ctx context.Context, info *service.PollInfo) (string, error)
-	Get(ctx context.Context, uuid string) (*service.PollInfo, error)
+	Create(poll *service.PollInfo) (string, error)
+	Get(uuid string) (*service.PollInfo, error)
+	SaveVote(uuid, answer string) error
 }
 
 func New(us PollService) *Handler {
