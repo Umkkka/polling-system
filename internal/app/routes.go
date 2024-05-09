@@ -13,6 +13,7 @@ import (
 	ginmiddleware "github.com/slok/go-http-metrics/middleware/gin"
 
 	"polling-system/internal/config"
+	"polling-system/internal/transport/handler"
 )
 
 // initRouter - инициализирует gin router
@@ -67,23 +68,12 @@ func setupTechnicalRoutes(engine *gin.Engine) {
 }
 
 // setupApiRoutes - определяет api группу и ее пути
-func setupApiRoutes(engine *gin.Engine) {
-	//api := engine.Group("/api")
-	//{
-	//	v1 := api.Group("/v1")
-	//	{
-	//		v1.POST("/user")
-	//	}
-	//}
-}
-
-// setupSrvRoutes - определяет srv группу и ее пути
-func setupSrvRoutes(engine *gin.Engine) {
-	//srv := engine.Group("/srv")
-	//{
-	//	v1 := srv.Group("/v1")
-	//	{
-	//		v1.POST("/user")
-	//	}
-	//}
+func setupApiRoutes(engine *gin.Engine, pollHandler *handler.Handler) {
+	api := engine.Group("/api")
+	{
+		v1 := api.Group("/v1")
+		{
+			v1.POST("/poll", pollHandler.CreatePoll)
+		}
+	}
 }

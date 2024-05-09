@@ -13,6 +13,9 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"polling-system/internal/config"
+	"polling-system/internal/service/poll"
+	"polling-system/internal/transport/handler"
+	"polling-system/internal/transport/repository"
 )
 
 func setupLogger(config *config.Config) (*logrus.Logger, error) {
@@ -70,13 +73,16 @@ func Run(config config.Config) error {
 		return fmt.Errorf("failed setup logger: %w", err)
 	}
 
+	repo := repository.New()
+	pollService := poll.New(repo)
+	pollHandler := handler.New(pollService)
+
 	// создание gin engine
 	engine := initRouter(&config)
 
 	// инициализация путей
 	setupTechnicalRoutes(engine)
-	setupApiRoutes(engine)
-	setupSrvRoutes(engine)
+	setupApiRoutes(engine, pollHandler)
 
 	sigint := make(chan os.Signal, 1)
 	signal.Notify(sigint, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
