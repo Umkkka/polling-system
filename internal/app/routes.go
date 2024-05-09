@@ -7,7 +7,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	cors "github.com/rs/cors/wrapper/gin"
+	"github.com/sirupsen/logrus"
 	slokmetrics "github.com/slok/go-http-metrics/metrics/prometheus"
 	"github.com/slok/go-http-metrics/middleware"
 	ginmiddleware "github.com/slok/go-http-metrics/middleware/gin"
@@ -15,6 +17,12 @@ import (
 	"polling-system/internal/config"
 	"polling-system/internal/transport/handler"
 )
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true // allow all connections
+	},
+}
 
 // initRouter - инициализирует gin router
 func initRouter(config *config.Config) *gin.Engine {
@@ -78,6 +86,30 @@ func setupApiRoutes(engine *gin.Engine, pollHandler *handler.Handler) {
 			v1.GET("/poll", pollHandler.GetPoll)
 
 			v1.POST("/vote", pollHandler.SaveVote)
+		}
+	}
+}
+
+func handleWebSocketConnection(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		logrus.Error("Error upgrading to WebSocket:", err)
+		return
+	}
+
+	defer conn.Close()
+
+	for {
+		messageType, p, err := conn.ReadMessage()
+		if err != nil {
+			logrus.Error("Error reading message:", err)
+			break
+		}
+
+		err = conn.WriteMessage(messageType, p)
+		if err != nil {
+			logrus.Error("Error writing message:", err)
+			break
 		}
 	}
 }

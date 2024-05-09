@@ -10,6 +10,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
+	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
 	"polling-system/internal/config"
@@ -77,12 +78,14 @@ func Run(config config.Config) error {
 	pollService := poll.New(repo)
 	pollHandler := handler.New(pollService)
 
-	// создание gin engine
 	engine := initRouter(&config)
 
-	// инициализация путей
 	setupTechnicalRoutes(engine)
 	setupApiRoutes(engine, pollHandler)
+
+	engine.GET("/ws", func(c *gin.Context) {
+		handleWebSocketConnection(c.Writer, c.Request)
+	})
 
 	sigint := make(chan os.Signal, 1)
 	signal.Notify(sigint, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)

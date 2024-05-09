@@ -49,21 +49,21 @@ func (r *Repo) Get(uuid string) (*service.PollInfo, error) {
 	return pollInfo, nil
 }
 
-func (r *Repo) SaveVote(uuid, answer string) error {
+func (r *Repo) SaveVote(uuid, answer string) (voteCount map[string]int, err error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	poll, ok := r.data[uuid]
 	if !ok {
-		return errors.New("poll not found")
+		return nil, errors.New("poll not found")
 	}
 
 	if !isExist(poll.Options, answer) {
-		return errors.New("answer does not exist in poll")
+		return nil, errors.New("answer does not exist in poll")
 	}
 
 	r.results[uuid][answer]++
-	return nil
+	return r.results[uuid], nil
 }
 
 func isExist(arr []string, target string) bool {

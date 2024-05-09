@@ -5,6 +5,7 @@ go 1.22.1
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.6.0
+	github.com/gorilla/websocket v1.5.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/prometheus/client_golang v1.19.0
 	github.com/rs/cors/wrapper/gin v0.0.0-20240429123903-3d336ea9b505
