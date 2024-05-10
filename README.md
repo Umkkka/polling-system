@@ -6,20 +6,28 @@ Service in Go that enables "The Decisives" to create polls, vote in real-time, a
 
 ## Questions
 
-In solving this problem, an API with minimal functionality was designed to solve the tasks set:
-- poll creation
-- voting
-- live results
+When developing this API, I made the following **key assumptions**:
 
-It is worth noting that the Go language map was chosen as the data warehouse, which can be easily replaced with a real database. To do this, a separate layer was implemented for working with the repository layer.
+- Users will create polls with the ability to select only one answer option from those provided.
+- When attempting to vote in a non-existent poll or for a non-existent answer option in a poll, the API should notify the user of this with the corresponding error.
+- Websocket connection will be used for displaying poll results, as it allows real-time results display.
 
-In addition, the mechanism for real-time notification of survey results by sending messages to websockets has not been fully implemented. However, the intended functionality is demonstrated in the API logs
+In the process of developing the API, I encountered a number of **compromises**:
 
-The following can be highlighted as further steps to expand this project:
+- Data storage. Poll data and results are stored in maps, but they can easily be replaced with tables in a traditional relational database.
+- Access to results and information about polls is organized in a way that only one process can work with this data at any given time. This slows down the API's performance, but ensures consistency and data integrity.
 
-- Creation and implementation of a database in the project
-- Creation web interface for the ability to display the results of polls in real time and vote
-- Additional thinking over the functionality of working in parallel mode under high load
+If this project were to evolve into a **full-scale application for the real world**, here are some enhancements or next steps that could be prioritized to improve its functionality, usability, and technical reliability:
+
+- Database Integration: Transition from using in-memory maps to a robust database system for storing poll data and results. This will ensure scalability, data persistence, and efficient data management.
+
+- User Authentication and Authorization: Implement a secure user authentication system to allow only authorized users to create, vote on, and view polls. This will enhance security and protect user data.
+
+- Real-Time Notifications: Implement real-time notifications to inform users of new polls, updates on polls they have participated in, and live result updates without the need to manually refresh the page.
+
+- Performance Optimization: Conduct performance optimizations such as caching mechanisms, load balancing, and scalability measures to handle increasing traffic and maintain fast response times.
+
+- User Feedback and Analytics: Collect user feedback to continuously improve the application based on user preferences and behaviors, and utilize analytics to track user engagement and identify areas for enhancement.
 
 ## API
 
